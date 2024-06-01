@@ -39,3 +39,39 @@ async def get_products():
         for product in products
     ]
     return jsonable_encoder(context)
+
+
+
+@product_router.get("/{id}")
+async def product_detail(id:int):
+    product = db.query(Product).filter(Product.id == id).first()
+    if not product:
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="not found")
+    return jsonable_encoder(product)
+
+
+@product_router.put("/{id}")
+async def update_product(id:int, product:ProductModel):
+    product_check = db.query(Product).filter(Product.id == id).first()
+    category = db.query(Category).filter(Category.id == product.category_id).first()
+    if not product_check:
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="product not found")
+    if not category:
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="category not found")
+
+    for key, value in product.dict().items():
+        setattr(product_check, key, value)
+
+    db.add(product_check)
+    db.commit()
+    return HTTPException(status_code=status.HTTP_200_OK,detail="updated")
+
+
+@product_router.delete("/{id}")
+async def delete_product(id:int):
+    product_check = db.query(Product).filter(Product.id == id).first()
+    if not product_check:
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="not found")
+    db.delete(product_check)
+    db.commit()
+    return HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="deleted")
