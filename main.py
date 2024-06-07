@@ -5,8 +5,14 @@ from routers.category import category_router
 from routers.products import product_router
 from routers.orders import order_router
 from auth import auth_router
+from fastapi_jwt_auth import AuthJWT
+from schemas import JwtModel
 
 Base.metadata.create_all(bind=engine)
+@AuthJWT.load_config
+def config():
+    return JwtModel()
+
 
 app = FastAPI()
 app.include_router(auth_router)

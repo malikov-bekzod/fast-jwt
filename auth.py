@@ -1,4 +1,5 @@
-from fastapi import APIRouter,HTTPException,status
+from fastapi import APIRouter,HTTPException,status,Depends
+from fastapi_jwt_auth import AuthJWT
 from schemas import RegisterModel,LoginModel
 from database.database import db
 from database.models import User
@@ -21,17 +22,27 @@ def register(user: RegisterModel):
         last_name=user.last_name,
         username=user.username,
         email=user.email,
-        password=generate_password_hash(user.password)
+        password=generate_password_hash(user.password),
+        is_staff=user.is_staff
     )
     db.add(new_user)
     db.commit()
     return HTTPException(status_code=status.HTTP_200_OK, detail="successfully signed up")
 
 @auth_router.post("/login")
-def register(user: LoginModel):
+def register(user: LoginModel, Authorize: AuthJWT = Depends()):
     check_user = db.query(User).filter(User.username == user.username).first()
     if check_user:
         if check_password_hash(check_user.password ,user.password):
-            return {"status_code": "200", "detail":"you're logged in"}
+            access_token = Authorize.create_access_token(subject=user.username, user_claims={"is_staff": check_user.is_staff})
+            refresh_token = Authorize.create_access_token(subject=user.username)
+            return {
+                "status_code": "200",
+                "detail":"you're logged in",
+                "token":{
+                    "access_token":access_token,
+                    "refresh_token":refresh_token
+                }
+            }
         return {"status_code": "400", "detail":"username or password wrong"}
     return {"status_code": "400", "detail":"username or password wrong"}

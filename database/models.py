@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, String, Integer, ForeignKey, Boolean
 from .database import Base
 from sqlalchemy.orm import relationship
 
@@ -33,6 +33,7 @@ class User(Base):
     username = Column(String)
     email = Column(String)
     password = Column(String)
+    is_staff = Column(Boolean, default=False)
 
     orders = relationship("Order", back_populates="users")
     

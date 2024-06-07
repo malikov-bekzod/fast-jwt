@@ -6,6 +6,7 @@ class RegisterModel(BaseModel):
     username: str
     email: str
     password: str
+    is_staff: bool
 
     class Config:
         orm_mode = True
@@ -45,3 +46,17 @@ class OrderModel(BaseModel):
 
     class Config:
         orm_mode = True
+
+class JwtModel(BaseModel):
+    authjwt_secret_key: str = '3ab42577ea4c274120ac14a8cd6d9b307f0b17f94d39a074b5073efe9c9fdbcb'
+
+
+
+
+
+
+
+
+
+
+
